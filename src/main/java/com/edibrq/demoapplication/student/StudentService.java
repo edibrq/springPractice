@@ -1,20 +1,26 @@
 package com.edibrq.demoapplication.student;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
-public class StudentService {
+public record StudentService(StudentRepository studentRepository) {
+    @Autowired
+    public StudentService {
+    }
+
     public List<Student> getStudents() {
-        return List.of(
-                new Student(1L,
-                        "Kew",
-                        21,
-                        LocalDate.of(2000, 4, 21),
-                        "@Aasd.gasd"
-                )
-        );
+        return studentRepository.findAll();
+    }
+
+    public void addStudent(Student student) {
+        Optional<Student> studentToFind  = studentRepository.findStudentByEmail(student.getEmail());
+        if (studentToFind.isPresent()) {
+            throw new IllegalStateException("There's student with the same email");
+        }
+        studentRepository.save(student);
     }
 }
